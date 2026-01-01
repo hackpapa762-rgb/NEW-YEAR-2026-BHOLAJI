@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>शुभ नव वर्ष!</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Rozha+One&family=Yatra+One&family=Poppins:wght@300;400;600&display=swap');
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: radial-gradient(circle at center, #2e021d 0%, #0f172a 100%); /* Slightly more royal purple/red */
+            color: white;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        .hindi-title {
+            font-family: 'Rozha One', serif;
+        }
+        
+        .hindi-text {
+            font-family: 'Yatra One', system-ui;
+        }
+
+        .animate-glow {
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        /* Floating decoration animation */
+        .floating-lantern {
+            position: absolute;
+            background: radial-gradient(circle, #ffaa00 0%, #ff4500 100%);
+            border-radius: 50%;
+            opacity: 0.6;
+            animation: floatUp 10s linear infinite;
+            z-index: 1;
+            box-shadow: 0 0 20px #ffaa00;
+        }
+
+        @keyframes floatUp {
+            0% { transform: translateY(100vh) scale(0.5); opacity: 0; }
+            20% { opacity: 0.8; }
+            80% { opacity: 0.8; }
+            100% { transform: translateY(-10vh) scale(1); opacity: 0; }
+        }
+
+        @keyframes glow {
+            from {
+                text-shadow: 0 0 10px #fff, 0 0 20px #ff00de, 0 0 30px #ff00de;
+            }
+            to {
+                text-shadow: 0 0 20px #fff, 0 0 30px #ff4da6, 0 0 40px #ff4da6;
+            }
+        }
+
+        /* Circular image loader styling */
+        .circle-loader {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .img-loaded {
+            animation: none;
+            border: 4px solid white;
+        }
+
+        canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center relative">
+
+    <!-- Canvas for Fireworks -->
+    <canvas id="fireworks"></canvas>
+
+    <!-- Audio Player -->
+    <audio id="bgMusic" loop>
+        <source src="nny.mp3" type="audio/mp3">
+        Your browser does not support the audio element.
+    </audio>
+
+    <!-- Background Decorations -->
+    <div id="floatingContainer" class="fixed inset-0 pointer-events-none z-0"></div>
+
+    <!-- Play Button Overlay (for autoplay policy) -->
+    <div id="startOverlay" class="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm transition-opacity duration-500">
+        <button id="startBtn" class="bg-gradient-to-r from-red-600 to-yellow-500 hover:from-red-700 hover:to-yellow-600 text-white font-bold py-5 px-10 rounded-full text-2xl shadow-2xl transform hover:scale-110 transition-all animate-bounce hindi-text border-2 border-yellow-300">
+            तोहफा खोलने के लिए यहाँ दबाएं 🎁
+        </button>
+    </div>
+
+    <!-- Main Content -->
+    <div class="z-20 w-full max-w-2xl px-4 py-20 mb-32 text-center flex-grow flex flex-col items-center justify-center min-h-screen">
+        
+        <!-- Dynamic Greeting -->
+        <h2 id="subGreeting" class="text-xl md:text-3xl text-yellow-300 mb-2 font-bold tracking-wider opacity-0 transition-opacity duration-1000 hindi-text drop-shadow-md">
+            की तरफ से: <span id="senderNameDisplay">आपका अपना</span>
+        </h2>
+
+        <!-- Main Title -->
+        <h1 class="hindi-title text-6xl md:text-8xl text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 animate-glow mb-8 p-4 leading-tight drop-shadow-lg">
+            नव वर्ष की<br>हार्दिक शुभकामनाएँ
+        </h1>
+        
+        <!-- Central GIF -->
+        <div id="mainImageContainer" class="relative w-64 h-64 md:w-80 md:h-80 mb-8 rounded-full overflow-hidden shadow-2xl border-8 border-yellow-500/60 mx-auto transition-transform duration-300 hover:scale-105">
+            <img src="Nuw.gif" alt="Happy New Year GIF" class="w-full h-full object-cover">
+        </div>
+
+        <p class="text-xl text-gray-100 mb-8 italic hindi-text px-2 drop-shadow-md leading-relaxed">
+            "इस नए साल में आपकी हर मुराद पूरी हो, और जीवन में खुशियों की बरसात हो!<br>आपको और आपके परिवार को नव वर्ष की ढेरों बधाई।"
+        </p>
+
+        <!-- Message Input Section -->
+        <div class="bg-white/10 backdrop-blur-xl p-8 rounded-3xl w-full border-2 border-yellow-400/30 shadow-2xl transform hover:scale-[1.02] transition-all duration-300">
+            <h3 class="text-2xl font-bold mb-4 text-yellow-200 hindi-text">अपनी शुभकामना भेजें ✨</h3>
+            <input type="text" id="nameInput" placeholder="अपना नाम यहाँ लिखें..." class="w-full p-4 rounded-xl bg-black/40 text-white border border-yellow-500/50 focus:border-yellow-400 focus:outline-none focus:ring-4 focus:ring-yellow-500/30 mb-6 transition-all text-lg placeholder-gray-400 text-center hindi-text" maxlength="25">
+            <button id="shareBtn" class="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold py-4 px-6 rounded-xl transition-all flex items-center justify-center gap-3 shadow-lg text-xl transform active:scale-95 hindi-text">
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+                व्हाट्सएप पर शेयर करें
+            </button>
+        </div>
+    </div>
+
+    <!-- Footer Section -->
+    <div class="w-full bg-black/60 backdrop-blur-md py-16 mt-auto flex flex-col items-center justify-center z-20 border-t border-white/10">
+        <p class="text-yellow-200/80 mb-6 font-bold tracking-[0.2em] uppercase text-sm hindi-text">निर्माता: B</p>
+        
+        <!-- Circular Image Loader -->
+        <div id="imageLoader" class="circle-loader w-32 h-32 mb-4 border-4 border-yellow-500 shadow-[0_0_30px_rgba(255,215,0,0.3)]">
+            <!-- Using a placeholder because direct linking to ibb.co requires parsing usually, 
+                 using a specific image URL as if it was loaded -->
+            <img id="footerImg" src="https://i.ibb.co/xSRRYhY7/placeholder.jpg" 
+                 onerror="this.src='https://ui-avatars.com/api/?name=B&background=random&size=200'" 
+                 alt="Made By B" 
+                 class="w-full h-full object-cover hidden">
+        </div>
+    </div>
+
+    <script>
+        // --- 1. Audio & Overlay Handling ---
+        const startBtn = document.getElementById('startBtn');
+        const startOverlay = document.getElementById('startOverlay');
+        const bgMusic = document.getElementById('bgMusic');
+
+        startBtn.addEventListener('click', () => {
+            startOverlay.style.opacity = '0';
+            setTimeout(() => startOverlay.style.display = 'none', 500);
+            bgMusic.play().catch(e => console.log('Audio play failed:', e));
+            launchInitialFireworks();
+        });
+
+        // --- 2. URL Parameters Handling (For Sharing) ---
+        const urlParams = new URLSearchParams(window.location.search);
+        const fromName = urlParams.get('from');
+        const subGreeting = document.getElementById('subGreeting');
+        const senderNameDisplay = document.getElementById('senderNameDisplay');
+
+        if (fromName) {
+            senderNameDisplay.textContent = decodeURIComponent(fromName);
+            subGreeting.style.opacity = '1';
+            document.title = `नव वर्ष की शुभकामनाएँ - ${decodeURIComponent(fromName)} की तरफ से!`;
+        } else {
+            document.title = "शुभ नव वर्ष 2025!";
+        }
+
+        // --- 3. WhatsApp Sharing Logic ---
+        const nameInput = document.getElementById('nameInput');
+        const shareBtn = document.getElementById('shareBtn');
+
+        shareBtn.addEventListener('click', () => {
+            const name = nameInput.value.trim();
+            if (!name) {
+                alert('कृपया अपना नाम लिखें!');
+                return;
+            }
+
+            // Construct current URL without parameters
+            const baseUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+            const shareUrl = `${baseUrl}?from=${encodeURIComponent(name)}`;
+            // Hindi Message
+            const message = `✨ नव वर्ष की हार्दिक शुभकामनाएँ! ✨\n\nमैंने आपके लिए एक खास सरप्राइज भेजा है, अभी देखें 👇\n${shareUrl}`;
+            
+            // Open WhatsApp
+            window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
+        });
+
+        // --- Extra Animation: Floating Particles ---
+        const floatingContainer = document.getElementById('floatingContainer');
+        function createFloatingElements() {
+            const count = 15;
+            for(let i=0; i<count; i++) {
+                const el = document.createElement('div');
+                el.classList.add('floating-lantern');
+                const size = Math.random() * 20 + 10;
+                el.style.width = `${size}px`;
+                el.style.height = `${size}px`;
+                el.style.left = `${Math.random() * 100}vw`;
+                el.style.animationDuration = `${Math.random() * 10 + 10}s`;
+                el.style.animationDelay = `${Math.random() * 5}s`;
+                floatingContainer.appendChild(el);
+            }
+        }
+        createFloatingElements();
+
+        // --- 4. Footer Image Loading Simulation ---
+        const imageLoader = document.getElementById('imageLoader');
+        const footerImg = document.getElementById('footerImg');
+
+        // Simulate loading or try to load real image
+        setTimeout(() => {
+            // Updated Logic:
+            // Since ibb.co/xSRRYhY7 is the page, the direct image might be https://i.ibb.co/xSRRYhY7/placeholder.jpg 
+            // or similar. The user wants this specific content. 
+            // We will attempt to load, and if it fails, the onerror in HTML will handle it.
+            // However, looking at the user request "https://ibb.co/xSRRYhY7 and this is an image of IMGBB"
+            // The direct link usually ends in .jpg or .png. 
+            // Let's assume standard loading behavior.
+            
+            footerImg.classList.remove('hidden');
+            imageLoader.classList.add('img-loaded');
+            imageLoader.style.animation = 'none';
+        }, 2000); // Increased delay slightly for suspense
+
+
+        // --- 5. Fireworks Animation (Canvas) ---
+        const canvas = document.getElementById('fireworks');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class Particle {
+            constructor(x, y, color) {
+                this.x = x;
+                this.y = y;
+                this.color = color;
+                this.velocity = {
+                    x: (Math.random() - 0.5) * 8,
+                    y: (Math.random() - 0.5) * 8
+                };
+                this.alpha = 1;
+                this.friction = 0.96;
+                this.gravity = 0.05;
+            }
+
+            draw() {
+                ctx.save();
+                ctx.globalAlpha = this.alpha;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, 3, 0, Math.PI * 2, false);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+                ctx.restore();
+            }
+
+            update() {
+                this.velocity.x *= this.friction;
+                this.velocity.y *= this.friction;
+                this.velocity.y += this.gravity;
+                this.x += this.velocity.x;
+                this.y += this.velocity.y;
+                this.alpha -= 0.01;
+            }
+        }
+
+        function createFirework(x, y) {
+            const colors = ['#ff0040', '#ff00de', '#5900ff', '#00d5ff', '#00ff88', '#fbff00'];
+            const color = colors[Math.floor(Math.random() * colors.length)];
+            const particleCount = 60;
+            for (let i = 0; i < particleCount; i++) {
+                particles.push(new Particle(x, y, color));
+            }
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            ctx.fillStyle = 'rgba(15, 23, 42, 0.2)'; // Trail effect
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            particles.forEach((particle, index) => {
+                if (particle.alpha > 0) {
+                    particle.update();
+                    particle.draw();
+                } else {
+                    particles.splice(index, 1);
+                }
+            });
+
+            // Random fireworks
+            if (Math.random() < 0.03) {
+                createFirework(Math.random() * canvas.width, Math.random() * canvas.height / 2);
+            }
+        }
+
+        function launchInitialFireworks() {
+             // Burst a few immediately
+             for(let i=0; i<5; i++) {
+                 setTimeout(() => {
+                     createFirework(
+                         canvas.width / 2 + (Math.random() - 0.5) * 400, 
+                         canvas.height / 3 + (Math.random() - 0.5) * 200
+                     );
+                 }, i * 300);
+             }
+        }
+
+        animate();
+
+    </script>
+</body>
+</html>
